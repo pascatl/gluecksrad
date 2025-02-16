@@ -9,6 +9,8 @@ export default defineConfig({
 		VitePWA({
 			registerType: "autoUpdate",
 			workbox: {
+				clientsClaim: true,
+				skipWaiting: true, // Neuer Service Worker ersetzt direkt den alten
 				runtimeCaching: [
 					// {
 					// 	urlPattern: /^https:\/\/fonts\.googleapis\.com/,
