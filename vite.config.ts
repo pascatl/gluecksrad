@@ -10,17 +10,17 @@ export default defineConfig({
 			registerType: "autoUpdate",
 			workbox: {
 				runtimeCaching: [
-					{
-						urlPattern: /^https:\/\/fonts\.googleapis\.com/,
-						handler: "CacheFirst",
-						options: {
-							cacheName: "google-fonts-cache",
-							expiration: {
-								maxEntries: 30,
-								maxAgeSeconds: 365 * 24 * 60 * 60, // 1 Jahr
-							},
-						},
-					},
+					// {
+					// 	urlPattern: /^https:\/\/fonts\.googleapis\.com/,
+					// 	handler: "CacheFirst",
+					// 	options: {
+					// 		cacheName: "google-fonts-cache",
+					// 		expiration: {
+					// 			maxEntries: 30,
+					// 			maxAgeSeconds: 365 * 24 * 60 * 60, // 1 Jahr
+					// 		},
+					// 	},
+					// },
 					{
 						urlPattern: /\/assets\//,
 						handler: "CacheFirst",
@@ -38,7 +38,7 @@ export default defineConfig({
 				background_color: "#ffffff",
 				icons: [
 					{
-						src: "assets/icon-512px.png",
+						src: "/icon-512px.png",
 						sizes: "512x512",
 						type: "image/png",
 					},

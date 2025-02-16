@@ -1,7 +1,6 @@
 @font-face {
 	font-family: "Dimbo";
-	src: url("/src/assets/fonts/dimbo/Dimbo\ Regular.ttf") format("woff");
-
+	src: url("/fonts/dimbo/Dimbo_Regular.ttf") format("truetype");
 	font-weight: normal;
 	font-style: normal;
 }
