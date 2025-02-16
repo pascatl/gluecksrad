@@ -17,7 +17,7 @@ Welcome to **Lucky Wheel**, an interactive spinning wheel application built with
 
 ```sh
 git clone https://github.com/pascatl/gluecksrad.git
-cd lucky-wheel
+cd gluecksrad
 ```
 
 ### 2️⃣ Install dependencies
