@@ -16,7 +16,7 @@ Welcome to **Lucky Wheel**, an interactive spinning wheel application built with
 ### 1️⃣ Clone the repository
 
 ```sh
-git clone https://github.com/your-username/lucky-wheel.git
+git clone https://github.com/pascatl/gluecksrad.git
 cd lucky-wheel
 ```
 
