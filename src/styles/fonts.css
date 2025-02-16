@@ -1,0 +1,12 @@
+@font-face {
+	font-family: "Norwester";
+	src: url("/src/assets/fonts/dimbo/Dimbo\ Regular.ttf") format("woff");
+
+	font-weight: normal;
+	font-style: normal;
+}
+
+/* Optionale Anwendung auf den Body */
+body {
+	font-family: "Dimbo", sans-serif;
+}

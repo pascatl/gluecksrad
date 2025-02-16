@@ -23,7 +23,7 @@ const generateContrastingColors = (count: number): string[] => {
 };
 
 export default function App() {
-	const [items, setItems] = useState<string[]>(["Option"]); // Kein voreingestellter Wert
+	const [items, setItems] = useState<string[]>([]);
 	const [newItem, setNewItem] = useState("");
 	const [winner, setWinner] = useState<string | null>(null);
 	const [mustSpin, setMustSpin] = useState(false);
@@ -73,7 +73,7 @@ export default function App() {
 				overflowX: "hidden",
 			}}
 		>
-			<Typography variant="h4" sx={{ m: 5 }} gutterBottom>
+			<Typography variant="h2" sx={{ m: 5 }} gutterBottom>
 				Glücksrad
 			</Typography>
 			<Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 3 }}>
@@ -90,7 +90,12 @@ export default function App() {
 			<List>
 				{items.map((item, index) => (
 					<ListItem
-						sx={{ border: 1, borderRadius: "5px", borderColor: "lightgray" }}
+						sx={{
+							border: 1,
+							borderRadius: "5px",
+							borderColor: "lightgray",
+							marginBottom: 1,
+						}}
 						key={index}
 						secondaryAction={
 							<IconButton edge="end" onClick={() => handleRemoveItem(index)}>
