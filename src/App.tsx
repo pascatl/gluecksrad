@@ -11,8 +11,9 @@ import {
 	ListItem,
 	IconButton,
 	Modal,
+	Link,
 } from "@mui/material";
-import { Delete } from "@mui/icons-material";
+import { Delete, GitHub } from "@mui/icons-material";
 import { useWindowSize } from "@react-hook/window-size";
 
 // Funktion zur Generierung von kontrastreichen Farben
@@ -176,6 +177,36 @@ export default function App() {
 					</Button>
 				</Box>
 			</Modal>
+			<Box
+				sx={{
+					mt: 5,
+					padding: 2,
+
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+					flexDirection: "column",
+				}}
+			>
+				{/* <Typography variant="body2">
+					&copy; 2025 pascatl. Alle Rechte vorbehalten.
+				</Typography> */}
+				<Box sx={{ mt: 1 }}>
+					<Typography variant="body2">
+						{/* <Link href="/impressum" sx={{ mr: 2 }}>
+							Impressum
+						</Link> */}
+						<Link
+							href="https://github.com/pascatl"
+							target="_blank"
+							sx={{ display: "flex", alignItems: "center" }}
+						>
+							{/* GitHub-Icon */}
+							<GitHub sx={{ mr: 1 }} />
+						</Link>
+					</Typography>
+				</Box>
+			</Box>
 		</Container>
 	);
 }
