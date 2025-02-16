@@ -1,6 +1,6 @@
 # Glücksrad - A React PWA
 
-Welcome to **Lucky Wheel**, an interactive spinning wheel application built with **React, Vite, Material UI, and TypeScript**. This project is also a **Progressive Web App (PWA)** that supports offline usage and updates automatically when a new version is available.
+Welcome to **Glücksrad**, an interactive spinning wheel application built with **React, Vite, Material UI, and TypeScript**. This project is also a **Progressive Web App (PWA)** that supports offline usage and updates automatically when a new version is available.
 
 ## 🚀 Features
 
