@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Wheel } from "react-custom-roulette";
+import Confetti from "react-confetti";
 import {
 	Button,
 	TextField,
@@ -9,8 +10,10 @@ import {
 	List,
 	ListItem,
 	IconButton,
+	Modal,
 } from "@mui/material";
 import { Delete } from "@mui/icons-material";
+import { useWindowSize } from "@react-hook/window-size";
 
 // Funktion zur Generierung von kontrastreichen Farben
 const generateContrastingColors = (count: number): string[] => {
@@ -28,6 +31,8 @@ export default function App() {
 	const [winner, setWinner] = useState<string | null>(null);
 	const [mustSpin, setMustSpin] = useState(false);
 	const [prizeNumber, setPrizeNumber] = useState(0);
+	const [openModal, setOpenModal] = useState(false);
+	const [width, height] = useWindowSize();
 
 	const handleAddItem = () => {
 		if (newItem.trim() !== "") {
@@ -45,6 +50,11 @@ export default function App() {
 		const randomIndex = Math.floor(Math.random() * items.length);
 		setPrizeNumber(randomIndex);
 		setMustSpin(true);
+	};
+
+	const handleCloseModal = () => {
+		setOpenModal(false);
+		setWinner(null);
 	};
 
 	const colors = generateContrastingColors(items.length);
@@ -122,7 +132,9 @@ export default function App() {
 					onStopSpinning={() => {
 						setMustSpin(false);
 						setWinner(items.length > 0 ? items[prizeNumber] : null);
+						setOpenModal(true);
 					}}
+					spinDuration={0.5}
 				/>
 			</Box>
 			<Button
@@ -133,11 +145,37 @@ export default function App() {
 			>
 				Drehen
 			</Button>
-			{winner && (
-				<Typography variant="h5" sx={{ mt: 3, color: "green" }}>
-					Gewinner: {winner}
-				</Typography>
-			)}
+
+			{/* Konfetti-Animation */}
+			{winner && <Confetti width={width} height={height} />}
+
+			{/* Gewinner-Modal */}
+			<Modal open={openModal} onClose={handleCloseModal}>
+				<Box
+					sx={{
+						position: "absolute",
+						top: "50%",
+						left: "50%",
+						transform: "translate(-50%, -50%)",
+						width: 300,
+						bgcolor: "background.paper",
+						boxShadow: 24,
+						borderRadius: 3,
+						p: 4,
+						textAlign: "center",
+					}}
+				>
+					<Typography variant="h4" sx={{ mb: 5, color: "green" }}>
+						🎉 {winner} 🎉
+					</Typography>
+					{/* <Typography variant="h5" sx={{ color: "green", mb: 3 }}>
+						{winner}
+					</Typography> */}
+					<Button variant="contained" onClick={handleCloseModal}>
+						OK
+					</Button>
+				</Box>
+			</Modal>
 		</Container>
 	);
 }
