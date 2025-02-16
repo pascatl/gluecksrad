@@ -197,12 +197,12 @@ export default function App() {
 							Impressum
 						</Link> */}
 						<Link
-							href="https://github.com/pascatl"
+							href="https://github.com/pascatl/gluecksrad"
 							target="_blank"
 							sx={{ display: "flex", alignItems: "center" }}
 						>
 							{/* GitHub-Icon */}
-							<GitHub sx={{ mr: 1 }} />
+							<GitHub />
 						</Link>
 					</Typography>
 				</Box>
