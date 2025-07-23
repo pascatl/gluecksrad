@@ -12,8 +12,13 @@ import {
 	IconButton,
 	Modal,
 	Link,
+	Checkbox,
+	FormControlLabel,
+	Accordion,
+	AccordionSummary,
+	AccordionDetails,
 } from "@mui/material";
-import { Delete, GitHub } from "@mui/icons-material";
+import { Delete, GitHub, ExpandMore } from "@mui/icons-material";
 import { useWindowSize } from "@react-hook/window-size";
 
 // Funktion zur Generierung von kontrastreichen Farben
@@ -26,6 +31,11 @@ const generateContrastingColors = (count: number): string[] => {
 	return colors;
 };
 
+// Vordefinierte Optionen
+const predefinedOptions = [
+	"Pascal", "Corinna", "Jan", "Ja", "Nein", "Kerstin", "Flo", "Miri", "Robin", "Franzi", "Alex", "Jonas", "Max", "Quirin", "Angy", "Mihaly"
+].sort((a, b) => a.localeCompare(b));
+
 export default function App() {
 	const [items, setItems] = useState<string[]>([]);
 	const [newItem, setNewItem] = useState("");
@@ -33,6 +43,7 @@ export default function App() {
 	const [mustSpin, setMustSpin] = useState(false);
 	const [prizeNumber, setPrizeNumber] = useState(0);
 	const [openModal, setOpenModal] = useState(false);
+	const [selectedPredefined, setSelectedPredefined] = useState<string[]>([]);
 	const [width, height] = useWindowSize();
 
 	const handleAddItem = () => {
@@ -46,9 +57,29 @@ export default function App() {
 		setItems(items.filter((_, i) => i !== index));
 	};
 
+	const handlePredefinedSelection = (option: string, checked: boolean) => {
+		if (checked) {
+			setSelectedPredefined([...selectedPredefined, option]);
+		} else {
+			setSelectedPredefined(selectedPredefined.filter(item => item !== option));
+		}
+	};
+
+	const handleApplySelectedOptions = () => {
+		// Füge die ausgewählten vordefinierten Optionen zu den Items hinzu
+		const newItems = [...items];
+		selectedPredefined.forEach(option => {
+			if (!newItems.includes(option)) {
+				newItems.push(option);
+			}
+		});
+		setItems(newItems);
+		setSelectedPredefined([]); // Reset der Auswahl
+	};
+
 	const handleSpin = () => {
-		if (items.length === 0) return;
-		const randomIndex = Math.floor(Math.random() * items.length);
+		if (allOptions.length === 0) return;
+		const randomIndex = Math.floor(Math.random() * allOptions.length);
 		setPrizeNumber(randomIndex);
 		setMustSpin(true);
 	};
@@ -58,19 +89,22 @@ export default function App() {
 		setWinner(null);
 	};
 
-	const colors = generateContrastingColors(items.length);
+	// Kombiniere alle Optionen (benutzerdefinierte + ausgewählte vordefinierte)
+	const allOptions = [...items];
+
+	const colors = generateContrastingColors(allOptions.length);
 	const wheelData =
-		items.length > 0
-			? items.map((item, index) => ({
-					option: item,
-					style: { backgroundColor: colors[index] },
-			  }))
+		allOptions.length > 0
+			? allOptions.map((item, index) => ({
+				option: item,
+				style: { backgroundColor: colors[index] },
+			}))
 			: [
-					{
-						option: "",
-						style: { backgroundColor: "#42f5cb" },
-					},
-			  ];
+				{
+					option: "",
+					style: { backgroundColor: "#42f5cb" },
+				},
+			];
 
 	return (
 		<Container
@@ -98,6 +132,55 @@ export default function App() {
 					Hinzufügen
 				</Button>
 			</Box>
+
+			{/* Accordion für vordefinierte Optionen */}
+			<Accordion sx={{ mb: 3 }}>
+				<AccordionSummary expandIcon={<ExpandMore />}>
+					<Typography variant="h6">
+						Aus vordefinierten Optionen wählen
+					</Typography>
+				</AccordionSummary>
+				<AccordionDetails>
+					<Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+						<Box sx={{
+							display: "grid",
+							gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+							gap: 1,
+							mb: 2
+						}}>
+							{predefinedOptions.map((option) => (
+								<FormControlLabel
+									key={option}
+									control={
+										<Checkbox
+											checked={selectedPredefined.includes(option)}
+											onChange={(e) => handlePredefinedSelection(option, e.target.checked)}
+											disabled={items.includes(option)}
+										/>
+									}
+									label={option}
+								/>
+							))}
+						</Box>
+						<Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
+							<Button
+								variant="contained"
+								onClick={handleApplySelectedOptions}
+								disabled={selectedPredefined.length === 0}
+							>
+								Ausgewählte Optionen hinzufügen ({selectedPredefined.length})
+							</Button>
+							<Button
+								variant="outlined"
+								onClick={() => setSelectedPredefined([])}
+								disabled={selectedPredefined.length === 0}
+							>
+								Auswahl zurücksetzen
+							</Button>
+						</Box>
+					</Box>
+				</AccordionDetails>
+			</Accordion>
 			<List>
 				{items.map((item, index) => (
 					<ListItem
@@ -132,7 +215,7 @@ export default function App() {
 					data={wheelData}
 					onStopSpinning={() => {
 						setMustSpin(false);
-						setWinner(items.length > 0 ? items[prizeNumber] : null);
+						setWinner(allOptions.length > 0 ? allOptions[prizeNumber] : null);
 						setOpenModal(true);
 					}}
 					spinDuration={0.5}
@@ -142,7 +225,7 @@ export default function App() {
 				variant="contained"
 				sx={{ mt: 3 }}
 				onClick={handleSpin}
-				disabled={items.length === 0}
+				disabled={allOptions.length === 0}
 			>
 				Drehen
 			</Button>
