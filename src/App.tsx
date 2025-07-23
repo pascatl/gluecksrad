@@ -19,7 +19,6 @@ import {
 	AccordionDetails,
 } from "@mui/material";
 import { Delete, GitHub, ExpandMore } from "@mui/icons-material";
-import { useWindowSize } from "@react-hook/window-size";
 
 // Funktion zur Generierung von kontrastreichen Farben
 const generateContrastingColors = (count: number): string[] => {
@@ -44,7 +43,6 @@ export default function App() {
 	const [prizeNumber, setPrizeNumber] = useState(0);
 	const [openModal, setOpenModal] = useState(false);
 	const [selectedPredefined, setSelectedPredefined] = useState<string[]>([]);
-	const [width, height] = useWindowSize();
 
 	const handleAddItem = () => {
 		if (newItem.trim() !== "") {
@@ -231,7 +229,15 @@ export default function App() {
 			</Button>
 
 			{/* Konfetti-Animation */}
-			{winner && <Confetti width={width} height={height} />}
+			{winner && (
+				<Confetti
+					width={window.innerWidth}
+					height={window.innerHeight}
+					recycle={false}
+					numberOfPieces={200}
+					gravity={0.3}
+				/>
+			)}
 
 			{/* Gewinner-Modal */}
 			<Modal open={openModal} onClose={handleCloseModal}>
