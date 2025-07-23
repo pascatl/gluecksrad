@@ -1,0 +1,6 @@
+services:
+  gluecksrad:
+    build: .
+    ports:
+      - "3100:80"
+    restart: unless-stopped
