@@ -44,6 +44,12 @@ npm run build
 npm run preview
 ```
 
+### 6️⃣ Run with Docker
+
+```sh
+docker compose up --build
+```
+
 ## 📦 PWA Installation
 
 The application supports **Progressive Web App (PWA)** features. To install:
