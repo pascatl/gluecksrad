@@ -33,7 +33,7 @@ const generateContrastingColors = (count: number): string[] => {
 
 // Vordefinierte Optionen
 const predefinedOptions = [
-	"Pascal", "Corinna", "Jan", "Ja", "Nein", "Kerstin", "Flo", "Miri", "Robin", "Franzi", "Alex", "Jonas", "Max", "Quirin", "Angy", "Mihaly"
+	"Pascal", "Corinna", "Jan", "Ja", "Nein", "Kerstin", "Flo", "Miri", "Robin", "Franzi", "Alex", "Jonas", "Max", "Quirin", "Angy", "Tom"
 ].sort((a, b) => a.localeCompare(b));
 
 export default function App() {
