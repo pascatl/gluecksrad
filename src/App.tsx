@@ -345,8 +345,10 @@ export default function App() {
 
 							handleTeamSelection(teamCount)
 						}
+						disabled={teamCount < 2 || ((teamCount*2-1) > allOptions.length)}
 					>
 						{teamCount} Glücksrad Teams generieren
+						
 					</Button>
 				</AccordionDetails>
 			</Accordion>
