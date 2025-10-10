@@ -20,6 +20,8 @@ import {
 } from "@mui/material";
 import { Delete, GitHub, ExpandMore } from "@mui/icons-material";
 import { useWindowSize } from "@react-hook/window-size";
+import { Card, CardHeader, CardContent } from "@mui/material";
+import GroupIcon from "@mui/icons-material/Group";
 
 // Funktion zur Generierung von kontrastreichen Farben
 const generateContrastingColors = (count: number): string[] => {
@@ -45,6 +47,9 @@ export default function App() {
 	const [openModal, setOpenModal] = useState(false);
 	const [selectedPredefined, setSelectedPredefined] = useState<string[]>([]);
 	const [width, height] = useWindowSize();
+	const [teamCount, setTeamCount] = useState(2);
+	const [teams, setTeams] = useState<string[][]>([]);
+	const [wheelMode, setWheelMode] = useState<"single" | "teams">("single");
 
 	const handleAddItem = () => {
 		if (newItem.trim() !== "") {
@@ -78,6 +83,7 @@ export default function App() {
 	};
 
 	const handleSpin = () => {
+		setWheelMode("single");
 		if (allOptions.length === 0) return;
 		const randomIndex = Math.floor(Math.random() * allOptions.length);
 		setPrizeNumber(randomIndex);
@@ -88,6 +94,42 @@ export default function App() {
 		setOpenModal(false);
 		setWinner(null);
 	};
+
+	
+	const handleTeamSelection = (numTeams: number) => {
+		setWheelMode("teams");
+		// clear teams 
+		setTeams([]);
+		
+		// start animation
+		setMustSpin(true);
+
+		if (allOptions.length < 2 || numTeams < 2 || numTeams > allOptions.length) return;
+
+		// Shuffle options
+		const shuffled = [...allOptions].sort(() => 0.5 - Math.random());
+
+		// Calculate base size and remainder
+		const baseSize = Math.floor(shuffled.length / numTeams);
+		const remainder = shuffled.length % numTeams;
+
+		const sizes = Array(numTeams).fill(baseSize);
+	
+		for (let i = 0; i < remainder; i++) {
+			sizes[i] += 1;
+		}
+
+		const newTeams: string[][] = [];
+		let start = 0;
+		for (let i = 0; i < numTeams; i++) {
+			const end = start + sizes[i];
+			newTeams.push(shuffled.slice(start, end));
+			start = end;
+		}
+
+		setTeams(newTeams);
+	};
+
 
 	// Kombiniere alle Optionen (benutzerdefinierte + ausgewählte vordefinierte)
 	const allOptions = [...items];
@@ -215,12 +257,45 @@ export default function App() {
 					data={wheelData}
 					onStopSpinning={() => {
 						setMustSpin(false);
-						setWinner(allOptions.length > 0 ? allOptions[prizeNumber] : null);
+						setWinner(allOptions.length > 0 && wheelMode !== "teams" ? allOptions[prizeNumber] : null);
 						setOpenModal(true);
 					}}
 					spinDuration={0.5}
 				/>
 			</Box>
+
+			{!mustSpin && wheelMode === "teams" && (
+				<Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", mt: 3 }}>
+					{teams.map((team, idx) => {
+						const teamColors = generateContrastingColors(teams.length);
+						return (
+							<Card
+								key={idx}
+								sx={{
+									width: 220,
+									m: 2,
+									background: teamColors[idx],
+									color: "#000000ff",
+								}}
+							>
+
+								<CardHeader title={`Team ${idx + 1}`} />
+								<CardContent>
+									{team.map((member, mIdx) => (
+										<Typography key={mIdx} variant="body1">{member}</Typography>
+									))}
+									<br></br>
+
+									<GroupIcon htmlColor="#000" />
+
+								</CardContent>
+
+							</Card>
+						);
+					})}
+				</Box>
+			)}
+
 			<Button
 				variant="contained"
 				sx={{ mt: 3 }}
@@ -230,36 +305,80 @@ export default function App() {
 				Drehen
 			</Button>
 
+
+			<Accordion style={{ marginTop: '20px' }}>
+				<AccordionSummary expandIcon={<ExpandMore />}>
+					<Typography>Team Modus</Typography>
+				</AccordionSummary>
+				<AccordionDetails>
+					<Box sx={{ mt: 3, mb: 2, display: "flex", justifyContent: "center", alignItems: "center", gap: 2 }}>
+						<TextField
+							label="Anzahl Teams"
+							type="number"
+							variant="outlined"
+							size="small"
+							inputProps={{
+								min: 2,
+								step: 1,
+							}}
+							value={teamCount}
+							onChange={e => {
+								const value = Number(e.target.value);
+								setTeamCount(value >= 2 ? value : 2);
+							}}
+							sx={{ width: 120 }}
+						/>
+					</Box>
+
+					<Button
+						variant="contained"
+						sx={{ mt: 3 }}
+						onClick={() =>
+
+							handleTeamSelection(teamCount)
+						}
+						disabled={teamCount < 2 || ((teamCount*2-1) > allOptions.length)}
+					>
+						{teamCount} Glücksrad Teams generieren
+						
+					</Button>
+				</AccordionDetails>
+			</Accordion>
+
+
+
 			{/* Konfetti-Animation */}
 			{winner && <Confetti width={width} height={height} />}
 
 			{/* Gewinner-Modal */}
-			<Modal open={openModal} onClose={handleCloseModal}>
-				<Box
-					sx={{
-						position: "absolute",
-						top: "50%",
-						left: "50%",
-						transform: "translate(-50%, -50%)",
-						width: 300,
-						bgcolor: "background.paper",
-						boxShadow: 24,
-						borderRadius: 3,
-						p: 4,
-						textAlign: "center",
-					}}
-				>
-					<Typography variant="h4" sx={{ mb: 5, color: "green" }}>
-						🎉 {winner} 🎉
-					</Typography>
-					{/* <Typography variant="h5" sx={{ color: "green", mb: 3 }}>
+			{winner !== null && (
+				<Modal open={openModal} onClose={handleCloseModal}>
+					<Box
+						sx={{
+							position: "absolute",
+							top: "50%",
+							left: "50%",
+							transform: "translate(-50%, -50%)",
+							width: 300,
+							bgcolor: "background.paper",
+							boxShadow: 24,
+							borderRadius: 3,
+							p: 4,
+							textAlign: "center",
+						}}
+					>
+						<Typography variant="h4" sx={{ mb: 5, color: "green" }}>
+							🎉 {winner} 🎉
+						</Typography>
+						{/* <Typography variant="h5" sx={{ color: "green", mb: 3 }}>
 						{winner}
 					</Typography> */}
-					<Button variant="contained" onClick={handleCloseModal}>
-						OK
-					</Button>
-				</Box>
-			</Modal>
+						<Button variant="contained" onClick={handleCloseModal}>
+							OK
+						</Button>
+					</Box>
+				</Modal>
+			)}
 			<Box
 				sx={{
 					mt: 5,
