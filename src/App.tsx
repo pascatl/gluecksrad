@@ -109,30 +109,22 @@ export default function App() {
 		// Shuffle options
 		const shuffled = [...allOptions].sort(() => 0.5 - Math.random());
 
-		// Calculate base team size and distribute remainder
+		// Calculate base size and remainder
 		const baseSize = Math.floor(shuffled.length / numTeams);
-		let remainder = shuffled.length % numTeams;
+		const remainder = shuffled.length % numTeams;
 
-		const newTeams: string[][] = [];
-		let idx = 0;
-		for (let i = 0; i < numTeams; i++) {
-			let teamSize = baseSize + (remainder > 0 ? 1 : 0);
-			if (teamSize < 2 && shuffled.length >= 2) teamSize = 2; // Ensure at least 2 per team if possible
-			newTeams.push(shuffled.slice(idx, idx + teamSize));
-			idx += teamSize;
-			if (remainder > 0) remainder--;
+		const sizes = Array(numTeams).fill(baseSize);
+	
+		for (let i = 0; i < remainder; i++) {
+			sizes[i] += 1;
 		}
 
-		// If any team has less than 2 members and there are teams with more, redistribute
-		for (let i = 0; i < newTeams.length; i++) {
-			if (newTeams[i].length < 2 && newTeams.length > 1) {
-				for (let j = 0; j < newTeams.length; j++) {
-					if (newTeams[j].length > 2) {
-						newTeams[i].push(newTeams[j].pop()!);
-						break;
-					}
-				}
-			}
+		const newTeams: string[][] = [];
+		let start = 0;
+		for (let i = 0; i < numTeams; i++) {
+			const end = start + sizes[i];
+			newTeams.push(shuffled.slice(start, end));
+			start = end;
 		}
 
 		setTeams(newTeams);
