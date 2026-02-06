@@ -2,5 +2,5 @@ services:
   gluecksrad:
     build: .
     ports:
-      - "3100:80"
+      - "3101:80"
     restart: unless-stopped
