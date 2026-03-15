@@ -38,6 +38,18 @@ const predefinedOptions = [
 	"Pascal", "Corinna", "Jan", "Ja", "Nein", "Kerstin", "Flo", "Miri", "Robin", "Franzi", "Alex", "Jonas", "Max", "Quirin", "Angy", "Tom"
 ].sort((a, b) => a.localeCompare(b));
 
+// Returns the number of full days elapsed since 1970-01-01
+const getDaysSince1970 = (): number =>
+	Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+
+// Deterministic pseudo-random number in [0, 1) for a given integer seed.
+// Multiplying by 10000 amplifies the period of Math.sin so consecutive
+// integer seeds produce well-distributed fractional parts.
+const seededRandom = (seed: number): number => {
+	const x = Math.sin(seed + 1) * 10000;
+	return x - Math.floor(x);
+};
+
 export default function App() {
 	const [items, setItems] = useState<string[]>([]);
 	const [newItem, setNewItem] = useState("");
@@ -50,6 +62,7 @@ export default function App() {
 	const [teamCount, setTeamCount] = useState(2);
 	const [teams, setTeams] = useState<string[][]>([]);
 	const [wheelMode, setWheelMode] = useState<"single" | "teams">("single");
+	const [daysSeed, setDaysSeed] = useState<string>("");
 
 	const handleAddItem = () => {
 		if (newItem.trim() !== "") {
@@ -85,7 +98,9 @@ export default function App() {
 	const handleSpin = () => {
 		setWheelMode("single");
 		if (allOptions.length === 0) return;
-		const randomIndex = Math.floor(Math.random() * allOptions.length);
+		const parsed = parseInt(daysSeed.trim(), 10);
+		const seed = !isNaN(parsed) ? parsed : getDaysSince1970();
+		const randomIndex = Math.floor(seededRandom(seed) * allOptions.length);
 		setPrizeNumber(randomIndex);
 		setMustSpin(true);
 	};
@@ -296,14 +311,33 @@ export default function App() {
 				</Box>
 			)}
 
-			<Button
-				variant="contained"
-				sx={{ mt: 3 }}
-				onClick={handleSpin}
-				disabled={allOptions.length === 0}
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+					gap: 2,
+					mt: 3,
+				}}
 			>
-				Drehen
-			</Button>
+				<TextField
+					label="Tage seit 1970 (leer = heute)"
+					type="number"
+					variant="outlined"
+					size="small"
+					value={daysSeed}
+					onChange={(e) => setDaysSeed(e.target.value)}
+					placeholder={String(getDaysSince1970())}
+					sx={{ width: 220 }}
+				/>
+				<Button
+					variant="contained"
+					onClick={handleSpin}
+					disabled={allOptions.length === 0}
+				>
+					Drehen
+				</Button>
+			</Box>
 
 
 			<Accordion style={{ marginTop: '20px' }}>
