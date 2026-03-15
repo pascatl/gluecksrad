@@ -82,6 +82,7 @@ const seededRandom = (seed: number): number => {
 export default function App() {
 	const [items, setItems] = useState<string[]>([]);
 	const [newItem, setNewItem] = useState("");
+	const [drawingTopic, setDrawingTopic] = useState("");
 	const [winner, setWinner] = useState<string | null>(null);
 	const [mustSpin, setMustSpin] = useState(false);
 	const [prizeNumber, setPrizeNumber] = useState(0);
@@ -182,10 +183,13 @@ export default function App() {
 				type: "image/png",
 			});
 
+			const topicPrefix = drawingTopic.trim()
+				? `Thema: ${drawingTopic.trim()}\n`
+				: "";
 			const shareText =
 				usedSeed !== null
-					? `🎉 Glücksrad-Ergebnis: ${winner}\nSeed: ${usedSeed} (Tage seit dem 28.06.1992)`
-					: `🎉 Glücksrad-Ergebnis: ${winner}\nOhne Seed erzeugt`;
+					? `${topicPrefix}🎉 Glücksrad-Ergebnis: ${winner}\nSeed: ${usedSeed} (Tage seit dem 28.06.1992)`
+					: `${topicPrefix}🎉 Glücksrad-Ergebnis: ${winner}\nOhne Seed erzeugt`;
 
 			const shareData: ShareData = {
 				title: "Glücksrad Ergebnis",
@@ -296,6 +300,15 @@ export default function App() {
 			<Typography variant="h2" sx={{ m: 5 }} gutterBottom>
 				Glücksrad
 			</Typography>
+			<Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+				<TextField
+					label="Thema der Auslosung (optional)"
+					variant="outlined"
+					value={drawingTopic}
+					onChange={(e) => setDrawingTopic(e.target.value)}
+					sx={{ width: { xs: "100%", sm: 420 } }}
+				/>
+			</Box>
 			<Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 3 }}>
 				<TextField
 					label="Neue Option"
@@ -611,6 +624,11 @@ export default function App() {
 							<Typography variant="overline" sx={{ letterSpacing: 1.2 }}>
 								Glücksrad Ergebnis
 							</Typography>
+							{drawingTopic.trim() && (
+								<Typography variant="h6" sx={{ mt: 1 }}>
+									{drawingTopic.trim()}
+								</Typography>
+							)}
 							<Typography variant="h4" sx={{ my: 2, color: "green" }}>
 								🎉 {winner} 🎉
 							</Typography>
