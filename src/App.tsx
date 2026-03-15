@@ -183,38 +183,18 @@ export default function App() {
 				type: "image/png",
 			});
 
-			const topicPrefix = drawingTopic.trim()
-				? `Thema: ${drawingTopic.trim()}\n`
-				: "";
-			const shareText =
-				usedSeed !== null
-					? `${topicPrefix}🎉 Glücksrad-Ergebnis: ${winner}\nSeed: ${usedSeed} (Tage seit dem 28.06.1992)`
-					: `${topicPrefix}🎉 Glücksrad-Ergebnis: ${winner}\nOhne Seed erzeugt`;
-
 			const shareData: ShareData = {
-				title: "Glücksrad Ergebnis",
-				text: shareText,
 				files: [imageFile],
 			};
 
-			if (navigator.canShare?.(shareData)) {
+			if (navigator.canShare?.({ files: [imageFile] })) {
 				await navigator.share(shareData);
 				return;
 			}
 
-			if (navigator.share) {
-				await navigator.share({
-					title: "Glücksrad Ergebnis",
-					text: shareText,
-				});
-				setShareHint(
-					"Auf diesem Gerät kann nur der Text direkt geteilt werden. Der Screenshot wurde zusätzlich heruntergeladen.",
-				);
-			} else {
-				setShareHint(
-					"Direktes Teilen wird hier nicht unterstützt. Der Screenshot wurde heruntergeladen.",
-				);
-			}
+			setShareHint(
+				"Direktes Bild-Teilen wird auf diesem Gerät oder in diesem Browser nicht unterstützt. Der Screenshot wurde stattdessen heruntergeladen.",
+			);
 
 			const downloadUrl = URL.createObjectURL(imageBlob);
 			const link = document.createElement("a");
