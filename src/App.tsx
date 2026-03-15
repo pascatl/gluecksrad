@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import html2canvas from "html2canvas";
 import { Wheel } from "react-custom-roulette";
 import Confetti from "react-confetti";
 import {
@@ -18,8 +19,15 @@ import {
 	AccordionSummary,
 	AccordionDetails,
 	Tooltip,
+	Stack,
 } from "@mui/material";
-import { Delete, GitHub, ExpandMore, InfoOutlined } from "@mui/icons-material";
+import {
+	Delete,
+	GitHub,
+	ExpandMore,
+	InfoOutlined,
+	Share,
+} from "@mui/icons-material";
 import { useWindowSize } from "@react-hook/window-size";
 import { Card, CardHeader, CardContent } from "@mui/material";
 import GroupIcon from "@mui/icons-material/Group";
@@ -88,6 +96,10 @@ export default function App() {
 	);
 	const [useSeed, setUseSeed] = useState(true);
 	const [openSeedInfo, setOpenSeedInfo] = useState(false);
+	const [usedSeed, setUsedSeed] = useState<number | null>(null);
+	const [isSharing, setIsSharing] = useState(false);
+	const [shareHint, setShareHint] = useState<string | null>(null);
+	const shareCardRef = useRef<HTMLDivElement | null>(null);
 
 	const handleAddItem = () => {
 		if (newItem.trim() !== "") {
@@ -125,14 +137,12 @@ export default function App() {
 	const handleSpin = () => {
 		setWheelMode("single");
 		if (allOptions.length === 0) return;
-		const randomValue = useSeed
-			? (() => {
-					const parsed = parseInt(daysSeed.trim(), 10);
-					const seed = !isNaN(parsed) ? parsed : getDaysSinceReferenceDate();
-					return seededRandom(seed);
-				})()
-			: Math.random();
+		setShareHint(null);
+		const parsed = parseInt(daysSeed.trim(), 10);
+		const seed = !isNaN(parsed) ? parsed : getDaysSinceReferenceDate();
+		const randomValue = useSeed ? seededRandom(seed) : Math.random();
 		const randomIndex = Math.floor(randomValue * allOptions.length);
+		setUsedSeed(useSeed ? seed : null);
 		setPrizeNumber(randomIndex);
 		setMustSpin(true);
 	};
@@ -140,10 +150,83 @@ export default function App() {
 	const handleCloseModal = () => {
 		setOpenModal(false);
 		setWinner(null);
+		setShareHint(null);
 	};
 
 	const handleCloseSeedInfo = () => {
 		setOpenSeedInfo(false);
+	};
+
+	const handleShareResult = async () => {
+		if (!winner || !shareCardRef.current) return;
+
+		setIsSharing(true);
+		setShareHint(null);
+
+		try {
+			const canvas = await html2canvas(shareCardRef.current, {
+				backgroundColor: "#ffffff",
+				scale: 2,
+				useCORS: true,
+			});
+
+			const imageBlob = await new Promise<Blob | null>((resolve) => {
+				canvas.toBlob(resolve, "image/png");
+			});
+
+			if (!imageBlob) {
+				throw new Error("Screenshot konnte nicht erstellt werden.");
+			}
+
+			const imageFile = new File([imageBlob], "gluecksrad-ergebnis.png", {
+				type: "image/png",
+			});
+
+			const shareText =
+				usedSeed !== null
+					? `🎉 Glücksrad-Ergebnis: ${winner}\nSeed: ${usedSeed} (Tage seit dem 28.06.1992)`
+					: `🎉 Glücksrad-Ergebnis: ${winner}\nOhne Seed erzeugt`;
+
+			const shareData: ShareData = {
+				title: "Glücksrad Ergebnis",
+				text: shareText,
+				files: [imageFile],
+			};
+
+			if (navigator.canShare?.(shareData)) {
+				await navigator.share(shareData);
+				return;
+			}
+
+			if (navigator.share) {
+				await navigator.share({
+					title: "Glücksrad Ergebnis",
+					text: shareText,
+				});
+				setShareHint(
+					"Auf diesem Gerät kann nur der Text direkt geteilt werden. Der Screenshot wurde zusätzlich heruntergeladen.",
+				);
+			} else {
+				setShareHint(
+					"Direktes Teilen wird hier nicht unterstützt. Der Screenshot wurde heruntergeladen.",
+				);
+			}
+
+			const downloadUrl = URL.createObjectURL(imageBlob);
+			const link = document.createElement("a");
+			link.href = downloadUrl;
+			link.download = imageFile.name;
+			link.click();
+			URL.revokeObjectURL(downloadUrl);
+		} catch (error) {
+			if (error instanceof DOMException && error.name === "AbortError") {
+				return;
+			}
+
+			setShareHint("Teilen ist auf diesem Gerät gerade nicht verfügbar.");
+		} finally {
+			setIsSharing(false);
+		}
 	};
 
 	const handleTeamSelection = (numTeams: number) => {
@@ -506,7 +589,7 @@ export default function App() {
 							top: "50%",
 							left: "50%",
 							transform: "translate(-50%, -50%)",
-							width: 300,
+							width: { xs: "90%", sm: 380 },
 							bgcolor: "background.paper",
 							boxShadow: 24,
 							borderRadius: 3,
@@ -514,15 +597,52 @@ export default function App() {
 							textAlign: "center",
 						}}
 					>
-						<Typography variant="h4" sx={{ mb: 5, color: "green" }}>
-							🎉 {winner} 🎉
-						</Typography>
-						{/* <Typography variant="h5" sx={{ color: "green", mb: 3 }}>
-						{winner}
-					</Typography> */}
-						<Button variant="contained" onClick={handleCloseModal}>
-							OK
-						</Button>
+						<Box
+							ref={shareCardRef}
+							sx={{
+								background:
+									"linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(239,248,255,1) 100%)",
+								borderRadius: 3,
+								border: "1px solid rgba(25, 118, 210, 0.15)",
+								p: 3,
+								mb: 3,
+							}}
+						>
+							<Typography variant="overline" sx={{ letterSpacing: 1.2 }}>
+								Glücksrad Ergebnis
+							</Typography>
+							<Typography variant="h4" sx={{ my: 2, color: "green" }}>
+								🎉 {winner} 🎉
+							</Typography>
+							<Typography variant="body2" color="text.secondary">
+								{usedSeed !== null
+									? `Seed: ${usedSeed}`
+									: "Seed nicht verwendet"}
+							</Typography>
+						</Box>
+						{shareHint && (
+							<Typography
+								variant="body2"
+								color="text.secondary"
+								sx={{ mb: 2, textAlign: "left" }}
+							>
+								{shareHint}
+							</Typography>
+						)}
+						<Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+							<Button
+								variant="contained"
+								startIcon={<Share />}
+								onClick={handleShareResult}
+								disabled={isSharing}
+								fullWidth
+							>
+								{isSharing ? "Teilen..." : "Teilen"}
+							</Button>
+							<Button variant="outlined" onClick={handleCloseModal} fullWidth>
+								OK
+							</Button>
+						</Stack>
 					</Box>
 				</Modal>
 			)}
