@@ -12,17 +12,6 @@ export default defineConfig({
 				clientsClaim: true,
 				skipWaiting: true, // Neuer Service Worker ersetzt direkt den alten
 				runtimeCaching: [
-					// {
-					// 	urlPattern: /^https:\/\/fonts\.googleapis\.com/,
-					// 	handler: "CacheFirst",
-					// 	options: {
-					// 		cacheName: "google-fonts-cache",
-					// 		expiration: {
-					// 			maxEntries: 30,
-					// 			maxAgeSeconds: 365 * 24 * 60 * 60, // 1 Jahr
-					// 		},
-					// 	},
-					// },
 					{
 						urlPattern: /\/assets\//,
 						handler: "CacheFirst",

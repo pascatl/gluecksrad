@@ -18,7 +18,13 @@ import { SeedControls } from "./components/SeedControls";
 import { SeedInfoModal } from "./components/SeedInfoModal";
 import { TeamModeAccordion } from "./components/TeamModeAccordion";
 import { VerificationAccordion } from "./components/VerificationAccordion";
+import { WhatsNewModal } from "./components/WhatsNewModal";
 import { WheelSection } from "./components/WheelSection";
+import {
+	WHATS_NEW_STORAGE_KEY,
+	whatsNewMessages,
+	type WhatsNewMessage,
+} from "./constants/whatsNew";
 import { useBodyScrollLock } from "./hooks/useBodyScrollLock";
 import type { BlockchainSeedInfo } from "./types/seed";
 import type { WheelDataItem, WheelMode } from "./types/wheel";
@@ -56,6 +62,9 @@ export default function App() {
 	const [wheelMode, setWheelMode] = useState<WheelMode>("single");
 	const [useSeed, setUseSeed] = useState(true);
 	const [openSeedInfo, setOpenSeedInfo] = useState(false);
+	const [activeWhatsNewMessage, setActiveWhatsNewMessage] =
+		useState<WhatsNewMessage | null>(null);
+	const [openWhatsNew, setOpenWhatsNew] = useState(false);
 	const [currentSeedInfo, setCurrentSeedInfo] =
 		useState<BlockchainSeedInfo | null>(null);
 	const [usedSeedInfo, setUsedSeedInfo] = useState<BlockchainSeedInfo | null>(
@@ -73,6 +82,30 @@ export default function App() {
 	const shareCardRef = useRef<HTMLDivElement | null>(null);
 
 	useBodyScrollLock(mustSpin);
+
+	useEffect(() => {
+		if (typeof window === "undefined") {
+			return;
+		}
+
+		let seenMessageIds: string[] = [];
+
+		try {
+			const rawValue = window.localStorage.getItem(WHATS_NEW_STORAGE_KEY);
+			seenMessageIds = rawValue ? (JSON.parse(rawValue) as string[]) : [];
+		} catch {
+			seenMessageIds = [];
+		}
+
+		const latestUnseenMessage = [...whatsNewMessages]
+			.reverse()
+			.find((message) => !seenMessageIds.includes(message.id));
+
+		if (latestUnseenMessage) {
+			setActiveWhatsNewMessage(latestUnseenMessage);
+			setOpenWhatsNew(true);
+		}
+	}, []);
 
 	useEffect(() => {
 		if (!useSeed) {
@@ -241,6 +274,35 @@ export default function App() {
 		setWinner(null);
 		setShowConfetti(false);
 		setShareHint(null);
+	};
+
+	const handleCloseWhatsNew = () => {
+		setOpenWhatsNew(false);
+		if (!activeWhatsNewMessage) {
+			return;
+		}
+
+		if (typeof window === "undefined") {
+			setActiveWhatsNewMessage(null);
+			return;
+		}
+
+		try {
+			const rawValue = window.localStorage.getItem(WHATS_NEW_STORAGE_KEY);
+			const seenMessageIds = rawValue ? (JSON.parse(rawValue) as string[]) : [];
+			const nextSeenMessageIds = Array.from(
+				new Set([...seenMessageIds, activeWhatsNewMessage.id]),
+			);
+
+			window.localStorage.setItem(
+				WHATS_NEW_STORAGE_KEY,
+				JSON.stringify(nextSeenMessageIds),
+			);
+		} catch {
+			// Ignore persistence errors.
+		}
+
+		setActiveWhatsNewMessage(null);
 	};
 
 	const handleCopySeedHash = async (hash: string) => {
@@ -532,6 +594,12 @@ export default function App() {
 			<SeedInfoModal
 				open={openSeedInfo}
 				onClose={() => setOpenSeedInfo(false)}
+			/>
+
+			<WhatsNewModal
+				open={openWhatsNew}
+				onClose={handleCloseWhatsNew}
+				message={activeWhatsNewMessage}
 			/>
 
 			{showConfetti && (
