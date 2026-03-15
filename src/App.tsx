@@ -632,11 +632,11 @@ export default function App() {
 							<Typography variant="h4" sx={{ my: 2, color: "green" }}>
 								🎉 {winner} 🎉
 							</Typography>
-							<Typography variant="body2" color="text.secondary">
-								{usedSeed !== null
-									? `Seed: ${usedSeed}`
-									: "Seed nicht verwendet"}
-							</Typography>
+							{usedSeed !== null && (
+								<Typography variant="body2" color="text.secondary">
+									{`Seed: ${usedSeed}`}
+								</Typography>
+							)}
 						</Box>
 						{shareHint && (
 							<Typography
