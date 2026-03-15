@@ -79,6 +79,21 @@ const seededRandom = (seed: number): number => {
 	return x - Math.floor(x);
 };
 
+const sanitizeFilenamePart = (value: string): string =>
+	value
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9äöüß]+/gi, "-")
+		.replace(/^-+|-+$/g, "")
+		.slice(0, 50);
+
+const createTimestamp = (): string => {
+	const now = new Date();
+	const pad = (value: number): string => String(value).padStart(2, "0");
+
+	return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+};
+
 export default function App() {
 	const [items, setItems] = useState<string[]>([]);
 	const [newItem, setNewItem] = useState("");
@@ -158,6 +173,15 @@ export default function App() {
 		setOpenSeedInfo(false);
 	};
 
+	const downloadImage = (imageBlob: Blob, fileName: string) => {
+		const downloadUrl = URL.createObjectURL(imageBlob);
+		const link = document.createElement("a");
+		link.href = downloadUrl;
+		link.download = fileName;
+		link.click();
+		URL.revokeObjectURL(downloadUrl);
+	};
+
 	const handleShareResult = async () => {
 		if (!winner || !shareCardRef.current) return;
 
@@ -179,7 +203,10 @@ export default function App() {
 				throw new Error("Screenshot konnte nicht erstellt werden.");
 			}
 
-			const imageFile = new File([imageBlob], "gluecksrad-ergebnis.png", {
+			const topicPart = sanitizeFilenamePart(drawingTopic);
+			const fileName = `${createTimestamp()}${topicPart ? `-${topicPart}` : ""}.png`;
+
+			const imageFile = new File([imageBlob], fileName, {
 				type: "image/png",
 			});
 
@@ -192,28 +219,10 @@ export default function App() {
 				return;
 			}
 
-			if (navigator.clipboard?.write && typeof ClipboardItem !== "undefined") {
-				await navigator.clipboard.write([
-					new ClipboardItem({
-						"image/png": imageBlob,
-					}),
-				]);
-				setShareHint(
-					"Direktes Bild-Teilen wird hier nicht unterstützt. Das Bild wurde in die Zwischenablage kopiert und kann jetzt direkt eingefügt werden.",
-				);
-				return;
-			}
-
 			setShareHint(
 				"Direktes Bild-Teilen wird auf diesem Gerät oder in diesem Browser nicht unterstützt. Der Screenshot wurde stattdessen heruntergeladen.",
 			);
-
-			const downloadUrl = URL.createObjectURL(imageBlob);
-			const link = document.createElement("a");
-			link.href = downloadUrl;
-			link.download = imageFile.name;
-			link.click();
-			URL.revokeObjectURL(downloadUrl);
+			downloadImage(imageBlob, fileName);
 		} catch (error) {
 			if (error instanceof DOMException && error.name === "AbortError") {
 				return;
