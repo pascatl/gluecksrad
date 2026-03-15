@@ -192,6 +192,18 @@ export default function App() {
 				return;
 			}
 
+			if (navigator.clipboard?.write && typeof ClipboardItem !== "undefined") {
+				await navigator.clipboard.write([
+					new ClipboardItem({
+						"image/png": imageBlob,
+					}),
+				]);
+				setShareHint(
+					"Direktes Bild-Teilen wird hier nicht unterstützt. Das Bild wurde in die Zwischenablage kopiert und kann jetzt direkt eingefügt werden.",
+				);
+				return;
+			}
+
 			setShareHint(
 				"Direktes Bild-Teilen wird auf diesem Gerät oder in diesem Browser nicht unterstützt. Der Screenshot wurde stattdessen heruntergeladen.",
 			);
@@ -601,9 +613,6 @@ export default function App() {
 								mb: 3,
 							}}
 						>
-							<Typography variant="overline" sx={{ letterSpacing: 1.2 }}>
-								Glücksrad Ergebnis
-							</Typography>
 							{drawingTopic.trim() && (
 								<Typography variant="h6" sx={{ mt: 1 }}>
 									{drawingTopic.trim()}
